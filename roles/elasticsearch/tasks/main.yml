@@ -1,0 +1,3 @@
+---
+- include: Redhat-elasticsearch-cluster.yml
+  when: ansible_os_family == 'RedHat'

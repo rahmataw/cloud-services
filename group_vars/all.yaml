@@ -1,0 +1,6 @@
+---
+elasticsearch_cluster_name: elk-cluster
+#elasticsearch_path_data:
+
+
+redis_requiredpass: password

@@ -1,0 +1,64 @@
+- name: Copy elasticsearch rpm file to server
+  become: no
+  copy:
+    src: redis-5.0.3-2.module_el8.2.x86_64.rpm
+    dest: /tmp/redis-5.0.3-2.module_el8.2.x86_64.rpm
+    force: yes
+
+- name: Install redis 5
+  yum:
+    name: /tmp/redis-5.0.3-2.module_el8.2.x86_64.rpm
+    state: present
+
+- name: Backup default redis configuration
+  command: cp /etc/redis.conf /etc/redis.conf.orig
+
+- name: Copying over redis.conf
+  template:
+    src: redis.conf.j2
+    dest: /etc/redis.conf
+
+#- name: replace line
+#  lineinfile:
+#    path: /etc/redis.conf
+#    regexp: "^#replicaof"
+#    line: "replicaof {{ hostvars[groups['redis'][0]] }} {{ redis_port }}"
+#    backrefs: yes
+#  when: inventory_hostname != groups['redis'][0]
+
+- name: Allow redis port on firewalld
+  firewalld:
+    port: "{{ redis_port }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+- name: Restart redis services
+  service:
+    name: redis
+    state: restarted
+    enabled: yes
+
+- name: Add slave to master
+  shell: "redis-cli -a {{ redis_requiredpass }} replicaof {{ groups['redis'][0] }} {{ redis_port }}"
+  when: inventory_hostname != groups['redis'][0]
+
+- name: Backup default redis-sentinel configuration
+  command: cp /etc/redis-sentinel.conf /etc/redis-sentinel.conf.orig
+
+- name: Copying over redis-sentinel.conf
+  template:
+    src: redis-sentinel.conf.j2
+    dest: /etc/redis-sentinel.conf
+
+- name: Allow redis-sentinel port on firewalld
+  firewalld:
+    port: "{{ redis_sentinel_port }}/tcp"
+    permanent: yes
+    immediate: yes
+    state: enabled
+
+- name: Restart redis services
+  service:
+    name: redis-sentinel
+    state: restarted
+    enabled: yes

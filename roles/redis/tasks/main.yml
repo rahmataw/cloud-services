@@ -1,0 +1,3 @@
+---
+- include: Redhat-redis-sentinel.yml
+  when: ansible_os_family == 'RedHat'

@@ -1,0 +1,10 @@
+---
+- name: Install elasticsearch
+  become: yes
+  user: deployer
+  hosts: elasticsearch
+  roles:
+    - role: elasticsearch
+      tags: elasticsearch
+    - role: redis
+      tags: redis
