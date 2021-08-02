@@ -3,5 +3,3 @@ elasticsearch_mode: single
 elasticsearch_cluster_name: elk-cluster
 elasticsearch_http_port: 9200
 elasticsearch_transport_port: 9300
-elasticsearch_path_data:
-elasticsearch_path_logs:

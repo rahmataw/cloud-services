@@ -37,7 +37,7 @@
     owner: elasticsearch
     group: elasticsearch
     mode: 0755
-  when: elasticsearch_path_data != ""
+  when: elasticsearch_path_data is defined
 
 - name: Create custom log directory
   file:
@@ -46,7 +46,7 @@
     owner: elasticsearch
     group: elasticsearch
     mode: 0755
-  when: elasticsearch_path_logs != ""
+  when: elasticsearch_path_logs is defined
 
 - name: Add elasticsearch port to firewalld
   firewalld:
