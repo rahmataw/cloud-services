@@ -4,13 +4,16 @@
     src: elasticsearch-7.13.2-x86_64.rpm 
     dest: /tmp/elasticsearch-7.13.2-x86_64.rpm
     force: yes
+    mode: 0644
+
 - name: Copy GPG Key
   become: no
   copy:
     src: GPG-KEY-elasticsearch
     dest: /tmp/GPG-KEY-elasticsearch
     force: yes
-
+    mode: 0644
+    
 - name: Import GPG Key
   rpm_key:
     state: present
@@ -20,18 +23,31 @@
   yum:
     name: /tmp/elasticsearch-7.13.2-x86_64.rpm
     state: present
+    mode: 0644
 
 - name: Create elasticsearch configuration file
   template:
     src: elasticsearch.yml.j2
     dest: /etc/elasticsearch/elasticsearch.yml
+    mode: 0644
 
-#- name: Copying over elasticsearch.yml
-#  merge_yaml:
-#    sources:
-#     - "{{ role_path }}/templates/elasticsearch.yml.j2"
-#      - "{{ inventory_dir | dirname }}/config/etc/elasticsearch/elasticsearch.yml"
-#    dest: "/etc/elasticsearch/elasticsearch.yml"
+- name: Create custom path data directory
+  file:
+    path: "{{ elasticsearch_path_data }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: 0755
+  when: elasticsearch_path_data != ""
+
+- name: Create custom log directory
+  file:
+    path: "{{ elasticsearch_path_logs }}"
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    mode: 0755
+  when: elasticsearch_path_logs != ""
 
 - name: Add elasticsearch port to firewalld
   firewalld:
@@ -40,7 +56,7 @@
     immediate: yes
     state: enabled
   loop:
-    - 9200/tcp
+    - "{{ elasticsearch_http_port }}/tcp"
     - 9300/tcp
 
 - name: Restart elasticsearch services
